@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Senja Brew Coffee</title>
+
+<style>
+:root{
+  --bg:#0b0f0e;
+  --card:#151a17;
+  --accent:#c2a27c;
+  --text:#e7e0d6;
+  --muted:#a89f93;
+  --soft:#2a322d;
+}
+
+body{
+  margin:0;
+  font-family:Segoe UI, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* NAV */
+nav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 20px;
+  background:#0f1411;
+  border-bottom:1px solid #222;
+  position:sticky;
+  top:0;
+}
+
+nav h1{
+  font-size:18px;
+  color:var(--accent);
+  letter-spacing:1px;
+}
+
+nav button{
+  margin-left:10px;
+  padding:8px 12px;
+  border:none;
+  border-radius:8px;
+  background:var(--soft);
+  color:var(--text);
+  cursor:pointer;
+}
+
+nav button:hover{
+  background:var(--accent);
+  color:#111;
+}
+
+/* PAGE */
+.page{display:none; padding:20px;}
+.active{display:block;}
+
+/* HOME */
+.hero{
+  text-align:center;
+  padding:40px 10px;
+}
+
+.hero img{
+  width:100%;
+  max-width:450px;
+  border-radius:14px;
+  margin-top:10px;
+  filter:contrast(1.1) brightness(0.9);
+}
+
+.info{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:14px;
+}
+
+/* MENU */
+.section-title{
+  margin:20px 0 10px;
+  color:var(--accent);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:10px;
+}
+
+.card{
+  background:var(--card);
+  padding:12px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:0.2s;
+  border:1px solid #222;
+}
+
+.card:hover{
+  transform:scale(1.02);
+  border-color:var(--accent);
+}
+
+/* CART */
+.cart-box{
+  background:var(--card);
+  padding:12px;
+  border-radius:12px;
+}
+
+.item{
+  display:flex;
+  justify-content:space-between;
+  margin:6px 0;
+  font-size:14px;
+  border-bottom:1px solid #222;
+  padding-bottom:5px;
+}
+
+.total{
+  margin-top:10px;
+  font-weight:bold;
+  color:var(--accent);
+}
+
+select, .btn{
+  margin-top:10px;
+  padding:10px;
+  width:100%;
+  border:none;
+  border-radius:10px;
+}
+
+select{
+  background:var(--soft);
+  color:var(--text);
+}
+
+.btn{
+  background:var(--accent);
+  color:#111;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btn:hover{
+  opacity:0.9;
+}
+
+/* SMALL */
+.small{
+  font-size:13px;
+  color:var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+  <h1>Senja Brew ☕</h1>
+  <div>
+    <button onclick="show('home')">Home</button>
+    <button onclick="show('menu')">Menu</button>
+    <button onclick="show('cart')">Cart (<span id="count">0</span>)</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <div class="hero">
+    <h2>Senja Brew Coffee</h2>
+    <p class="small">Coffee • Dessert • Calm Space</p>
+
+    <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93">
+
+    <div class="info">
+      📶 WiFi: senjabrew_guest<br>
+      👤 Username: guest<br>
+      🔑 Password: coffee123
+    </div>
+  </div>
+</div>
+
+<!-- MENU -->
+<div id="menu" class="page">
+
+  <h3 class="section-title">🍰 Food & Dessert</h3>
+  <div class="grid" id="food"></div>
+
+  <h3 class="section-title">🥤 Drinks</h3>
+  <div class="grid" id="drink"></div>
+
+</div>
+
+<!-- CART -->
+<div id="cart" class="page">
+
+  <h3 class="section-title">🛒 Keranjang</h3>
+  <div class="cart-box" id="cartList"></div>
+
+  <p class="total">Total: Rp <span id="total">0</span></p>
+
+  <h4>Metode Pembayaran</h4>
+  <select id="pay">
+    <option>QRIS</option>
+    <option>Cash</option>
+    <option>Bank Transfer</option>
+  </select>
+
+  <button class="btn" onclick="checkout()">Checkout</button>
+
+</div>
+
+<script>
+
+function show(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById(p).classList.add('active');
+}
+
+/* MENU DATA */
+const foods = [
+"Lava Cake","Cheesecake","Brownies","Croissant","Donut",
+"Pancake","Waffle","Tiramisu","Macaron","Apple Pie",
+"Sandwich","Burger Mini","Fries","Toast","Cookies"
+];
+
+const drinks = [
+"Latte","Cappuccino","Americano","Mocha","Espresso",
+"Matcha","Thai Tea","Milk Tea","Lemon Tea","Iced Coffee"
+];
+
+let cart=[];
+let total=0;
+
+/* RENDER MENU */
+function renderMenu(){
+  let f=document.getElementById("food");
+  let d=document.getElementById("drink");
+
+  foods.forEach(i=>{
+    f.innerHTML += `<div class="card" onclick="add('${i}',15000)">
+      🍰 ${i}<br><span class="small">Rp 15.000</span>
+    </div>`;
+  });
+
+  drinks.forEach(i=>{
+    d.innerHTML += `<div class="card" onclick="add('${i}',12000)">
+      🥤 ${i}<br><span class="small">Rp 12.000</span>
+    </div>`;
+  });
+}
+
+/* ADD TO CART */
+function add(name,price){
+  cart.push({name,price});
+  total+=price;
+
+  document.getElementById("count").innerText=cart.length;
+  renderCart();
+}
+
+/* CART RENDER */
+function renderCart(){
+  let box=document.getElementById("cartList");
+  box.innerHTML="";
+
+  cart.forEach((i,index)=>{
+    box.innerHTML += `
+      <div class="item">
+        <span>${i.name}</span>
+        <span onclick="removeItem(${index})" style="cursor:pointer;color:#c2a27c;">✕</span>
+      </div>
+    `;
+  });
+
+  document.getElementById("total").innerText=total;
+}
+
+/* REMOVE ITEM */
+function removeItem(i){
+  total-=cart[i].price;
+  cart.splice(i,1);
+
+  document.getElementById("count").innerText=cart.length;
+  renderCart();
+}
+
+/* CHECKOUT */
+function checkout(){
+  if(cart.length===0){
+    alert("Keranjang kosong!");
+    return;
+  }
+
+  let pay=document.getElementById("pay").value;
+
+  alert(
+    "☕ Senja Brew Receipt\n\n"+
+    "Metode: "+pay+"\n"+
+    "Total: Rp "+total+"\n\n"+
+    "Terima kasih sudah order!"
+  );
+
+  cart=[];
+  total=0;
+  document.getElementById("count").innerText=0;
+  renderCart();
+}
+
+renderMenu();
+
+</script>
+
+</body>
+</html>
